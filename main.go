@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-micro/plugins/v4/client/grpc"
 	"go-micro.dev/v4"
@@ -33,6 +34,13 @@ func main() {
 	accountRoute.PATCH("/update/:id", handler.NewAccount().UpdateAccount)
 	accountRoute.DELETE("/remove/:id", handler.NewAccount().RemoveAccount)
 	accountRoute.POST("/getbalance", handler.NewAccount().GetBalance)
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:  []string{"*"},
+		AllowMethods:  []string{"*"},
+		AllowHeaders:  []string{"*"},
+		ExposeHeaders: []string{"*"},
+	}))
 
 	transactionRoute := r.Group("/transaction")
 	transactionRoute.POST("/transferbank", handler.NewTransaction().TransferBank)

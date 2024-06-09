@@ -150,14 +150,30 @@ type BodyPayloadBalance struct{}
 
 func (a *accountImplement) GetBalance(g *gin.Context) {
 
-	bodyPayloadBal := BodyPayloadBalance{}
-	err := g.BindJSON(&bodyPayloadBal)
+	// bodyPayloadBal := BodyPayloadBalance{}
+	// err := g.BindJSON(&bodyPayloadBal)
 
-	if err != nil {
-		g.AbortWithError(http.StatusBadRequest, err)
+	sumResult := struct {
+		Total int
+	}{}
+	transaction := []model.Transaction{}
+	orm := utils.NewDatabase().Orm
+	db, _ := orm.DB()
+
+	defer db.Close()
+
+	q := orm.Model(&model.Transaction{}).Select("sum(amount) as total").Where("").First(&sumResult)
+
+	result := q.Find(&transaction)
+	if result.Error != nil {
+		g.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": result.Error,
+		})
+		return
 	}
 
 	g.JSON(http.StatusOK, gin.H{
 		"message": "Hello guys this API rest for later",
+		"data":    transaction,
 	})
 }
